@@ -14,10 +14,14 @@
 **Backend `server/routes/products.js`:**
 ```javascript
 router.get('/search', async (req, res) => {
-  const q = req.query.q;
-  if (!q) return res.status(400).json({ error: 'Query required' });
-  const products = await Product.find({ name: { $regex: q, $options: 'i' } });
-  res.json(products);
+  try {
+    const q = req.query.q;
+    if (!q) return res.status(400).json({ error: 'Query required' });
+    const products = await Product.find({ name: { $regex: q, $options: 'i' } }).sort({ createdAt: -1 });
+    return res.status(200).json(products);
+  } catch (err) {
+    return res.status(500).json({ error: 'Server error' });
+  }
 });
 ```
 
@@ -29,7 +33,8 @@ const [search, setSearch] = useState('');
 // Function
 const handleSearch = async () => {
   const res = await fetch(`http://localhost:5003/api/products/search?q=${search}`);
-  setProducts(await res.json());
+  const data = await res.json();
+  setProducts(data);
 };
 
 // JSX
@@ -44,14 +49,18 @@ const handleSearch = async () => {
 **Backend `server/routes/products.js`:**
 ```javascript
 router.get('/sort', async (req, res) => {
-  const { field, order } = req.query;
-  const allowed = ['name', 'price', 'quantity', 'createdAt'];
-  if (!allowed.includes(field)) return res.status(400).json({ error: 'Invalid field' });
-  
-  const sort = {};
-  sort[field] = order === 'desc' ? -1 : 1;
-  const products = await Product.find().sort(sort);
-  res.json(products);
+  try {
+    const { field, order } = req.query;
+    const allowed = ['name', 'price', 'quantity', 'createdAt'];
+    if (!allowed.includes(field)) return res.status(400).json({ error: 'Invalid field' });
+    
+    const sort = {};
+    sort[field] = order === 'desc' ? -1 : 1;
+    const products = await Product.find().sort(sort);
+    return res.status(200).json(products);
+  } catch (err) {
+    return res.status(500).json({ error: 'Server error' });
+  }
 });
 ```
 
@@ -60,7 +69,8 @@ router.get('/sort', async (req, res) => {
 // Function
 const handleSort = async (field, order) => {
   const res = await fetch(`http://localhost:5003/api/products/sort?field=${field}&order=${order}`);
-  setProducts(await res.json());
+  const data = await res.json();
+  setProducts(data);
 };
 
 // JSX
@@ -76,14 +86,18 @@ const handleSort = async (field, order) => {
 **Backend `server/routes/products.js`:**
 ```javascript
 router.get('/filter', async (req, res) => {
-  const filter = {};
-  if (req.query.minPrice || req.query.maxPrice) {
-    filter.price = {};
-    if (req.query.minPrice) filter.price.$gte = parseFloat(req.query.minPrice);
-    if (req.query.maxPrice) filter.price.$lte = parseFloat(req.query.maxPrice);
+  try {
+    const filter = {};
+    if (req.query.minPrice || req.query.maxPrice) {
+      filter.price = {};
+      if (req.query.minPrice) filter.price.$gte = parseFloat(req.query.minPrice);
+      if (req.query.maxPrice) filter.price.$lte = parseFloat(req.query.maxPrice);
+    }
+    const products = await Product.find(filter).sort({ createdAt: -1 });
+    return res.status(200).json(products);
+  } catch (err) {
+    return res.status(500).json({ error: 'Server error' });
   }
-  const products = await Product.find(filter);
-  res.json(products);
 });
 ```
 
@@ -99,7 +113,8 @@ const handleFilter = async () => {
   if (min) url.searchParams.append('minPrice', min);
   if (max) url.searchParams.append('maxPrice', max);
   const res = await fetch(url);
-  setProducts(await res.json());
+  const data = await res.json();
+  setProducts(data);
 };
 
 // JSX
@@ -118,9 +133,9 @@ router.post('/', async (req, res) => {
   try {
     const product = new Product(req.body);
     await product.save();
-    res.status(201).json(product);
+    return res.status(201).json(product);
   } catch (err) {
-    res.status(400).json({ error: 'Failed to create' });
+    return res.status(500).json({ error: 'Server error' });
   }
 });
 ```
@@ -161,9 +176,9 @@ router.put('/:id', async (req, res) => {
   try {
     const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!product) return res.status(404).json({ error: 'Not found' });
-    res.json(product);
+    return res.status(200).json(product);
   } catch (err) {
-    res.status(400).json({ error: 'Failed to update' });
+    return res.status(500).json({ error: 'Server error' });
   }
 });
 ```

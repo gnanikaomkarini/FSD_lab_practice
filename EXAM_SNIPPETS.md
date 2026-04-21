@@ -6,7 +6,6 @@
 3. [Filter](#3-filter) - Range queries
 4. [CREATE](#4-create) - POST new product
 5. [UPDATE](#5-update) - PUT existing product
-6. [DELETE](#6-delete) - DELETE product
 
 ---
 
@@ -209,35 +208,6 @@ const handleUpdate = async () => {
 }}>Edit</button>
 ```
 
----
-
-## 6️⃣ DELETE
-
-**Backend `server/routes/products.js`:**
-```javascript
-router.delete('/:id', async (req, res) => {
-  try {
-    const product = await Product.findByIdAndDelete(req.params.id);
-    if (!product) return res.status(404).json({ error: 'Not found' });
-    res.json({ message: 'Deleted' });
-  } catch (err) {
-    res.status(400).json({ error: 'Failed to delete' });
-  }
-});
-```
-
-**Frontend `client/src/App.js`:**
-```javascript
-// Function
-const handleDelete = async (id) => {
-  const res = await fetch(`http://localhost:5003/api/products/${id}`, { method: 'DELETE' });
-  if (res.ok) setProducts(products.filter(p => p._id !== id));
-};
-
-// Delete button in ProductTable:
-<button onClick={() => handleDelete(product._id)}>Delete</button>
-```
-
 ## ⚠️ ROUTE ORDER
 
 ```javascript
@@ -247,8 +217,7 @@ router.get('/search', ...);    // Search
 router.get('/sort', ...);      // Sort
 router.get('/filter', ...);    // Filter
 router.post('/', ...);         // Create
-router.put('/:id', ...);       // Update (must be before delete)
-router.delete('/:id', ...);    // Delete (must be last)
+router.put('/:id', ...);       // Update
 ```
 
 **Why?** Express matches routes in order. Specific routes BEFORE generic ones.
@@ -276,9 +245,6 @@ curl -X POST http://localhost:5003/api/products \
 curl -X PUT http://localhost:5003/api/products/ID \
   -H "Content-Type: application/json" \
   -d '{"name":"Updated","price":60000,"quantity":5}'
-
-# Delete
-curl -X DELETE http://localhost:5003/api/products/ID
 ```
 
 ---
@@ -290,7 +256,6 @@ curl -X DELETE http://localhost:5003/api/products/ID
 - **Filter:** `$gte` and `$lte` operators
 - **Create:** `new Product(body)` + `.save()`
 - **Update:** `findByIdAndUpdate(id, body, { new: true })`
-- **Delete:** `findByIdAndDelete(id)`
 
 Frontend always:
 1. `useState` for inputs

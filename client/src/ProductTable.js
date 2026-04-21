@@ -1,6 +1,6 @@
 import React from "react";
 
-function ProductTable({ products }) {
+function ProductTable({ products, onRowClick }) {
   if (!products || products.length === 0) {
     return <div className="state">No products found.</div>;
   }
@@ -17,7 +17,12 @@ function ProductTable({ products }) {
       </thead>
       <tbody>
         {products.map((product) => (
-          <tr key={product._id}>
+          // EDIT MODE: Click any row to edit the product
+          <tr 
+            key={product._id}
+            onClick={() => onRowClick(product)}
+            style={{ cursor: "pointer" }}
+          >
             <td>{product.name}</td>
             <td>{product.price}</td>
             <td>{product.quantity}</td>

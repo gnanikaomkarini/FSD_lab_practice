@@ -291,17 +291,17 @@ Frontend always:
 It shows exactly how each file looks after adding each component:
 - **App.js:** 6 steps showing states → handlers → complete JSX layout
 - **ProductTable.js:** 1 step to add `onRowClick` prop
-- **index.css:** 4 new CSS classes for styling
+- **index.css:** ✅ NO CSS TO WRITE! Already styled, just use inline styles if needed
 
 **UI Layout:**
 - Header: Title + "+ Add Product" button
 - Toolbar: Search input + Sort buttons + Filter inputs
 - Forms: Create form (when + clicked), Edit form (when row clicked)
-- Table: Clickable rows (cursor pointer)
+- Table: Clickable rows
 
 **UX Flow:**
 1. Search: Type → Click Search
-2. Sort: Click button (active state highlights)
+2. Sort: Click button
 3. Filter: Enter min/max → Click Filter
 4. Create: Click "+" → Fill form → Save
 5. Update: Click row → Edit form → Save

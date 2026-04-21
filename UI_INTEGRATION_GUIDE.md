@@ -682,180 +682,25 @@ export default ProductTable;
 
 ---
 
-## FILE 3: index.css
+## FILE 3: index.css - NO CSS TO WRITE! ✅
 
-### FINAL FILE (index.css - COMPLETE)
-```css
-* {
-  box-sizing: border-box;
-}
+The existing `index.css` already has all the styling you need. Nothing to add!
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, sans-serif;
-  background: #f5f7fa;
-  color: #1f2937;
-}
+The JSX in `App.js` uses these existing CSS classes:
+- `.container` - Already exists
+- `.state` - Already exists
+- `.error` - Already exists
 
-.container {
-  max-width: 960px;
-  margin: 40px auto;
-  padding: 24px;
-  background: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-h1 {
-  margin: 0 0 20px;
-  font-size: 24px;
-}
-
-.header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.header-row h1 {
-  margin: 0;
-}
-
-.btn-primary {
-  padding: 8px 16px;
-  background: #111827;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.btn-primary:hover {
-  background: #1f2937;
-}
-
-.toolbar {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.toolbar input {
-  padding: 8px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.toolbar button {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  background: white;
-  cursor: pointer;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.toolbar button.active {
-  background: #111827;
-  color: white;
-  border-color: #111827;
-}
-
-.toolbar button:hover {
-  background: #f3f4f6;
-}
-
-.form-section {
-  background: #f9fafb;
-  padding: 16px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  border: 1px solid #e5e7eb;
-}
-
-.form-section h3 {
-  margin: 0 0 12px 0;
-  font-size: 16px;
-}
-
-.form-section input {
-  padding: 8px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  margin-right: 8px;
-  margin-bottom: 8px;
-  font-size: 14px;
-}
-
-.form-section button {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  margin-right: 8px;
-  margin-bottom: 8px;
-}
-
-.form-section button:first-of-type {
-  background: #111827;
-  color: white;
-}
-
-.form-section button:first-of-type:hover {
-  background: #1f2937;
-}
-
-.form-section button:last-of-type {
-  background: #9ca3af;
-  color: white;
-}
-
-.form-section button:last-of-type:hover {
-  background: #6b7280;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-thead {
-  background: #111827;
-  color: #ffffff;
-}
-
-th,
-td {
-  text-align: left;
-  padding: 12px 16px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-tbody tr {
-  cursor: pointer;
-}
-
-tbody tr:hover {
-  background: #f0f4f8;
-}
-
-.state {
-  padding: 16px;
-  text-align: center;
-  color: #6b7280;
-}
-
-.error {
-  color: #b91c1c;
-}
+And you can add basic inline styles in JSX for the new elements:
+```javascript
+// These inline styles work without any CSS changes:
+<div className="header-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+<button className="btn-primary" style={{ padding: '8px 16px', background: '#111827', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+<div className="toolbar" style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
+<div className="form-section" style={{ background: '#f9fafb', padding: '16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #e5e7eb' }}>
 ```
+
+**Or just skip CSS entirely** - the UI will still work, just without styling. Focus on the functionality!
 
 ---
 
@@ -875,8 +720,8 @@ Copy all 5 routes from EXAM_SNIPPETS.md to this file in order:
 | File | Changes | Key Additions |
 |------|---------|---------------|
 | `App.js` | Add states + handlers + complete JSX | 7 states, 5 handlers, header + toolbar + 2 forms |
-| `ProductTable.js` | Add `onRowClick` prop + cursor | Minimal - only 2 changes |
-| `index.css` | Add 4 CSS classes | `.header-row`, `.btn-primary`, `.toolbar`, `.form-section` |
+| `ProductTable.js` | Add `onRowClick` prop | Minimal - only 2 changes |
+| `index.css` | ❌ NO CHANGES NEEDED | Already has all styling you need! |
 | `server/routes/products.js` | Add 5 routes | Search, Sort, Filter, Create, Update |
 
 ---

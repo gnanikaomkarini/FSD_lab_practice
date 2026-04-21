@@ -1,5 +1,10 @@
 # 🚀 MERN LAB EXAM - ULTRA-MINIMAL SNIPPETS
 
+## 📖 Quick Links
+- **UI Integration Guide:** See `UI_INTEGRATION_GUIDE.md` for complete file-by-file breakdown
+- **Backend Routes:** Copy all 5 routes to `server/routes/products.js`
+- **Frontend:** Copy code to `client/src/App.js`, `client/src/ProductTable.js`, `client/src/index.css`
+
 ## Features
 1. [Search](#1-search) - Find by name
 2. [Sort](#2-sort) - Order by field
@@ -276,5 +281,29 @@ Frontend always:
 1. `useState` for inputs
 2. `fetch()` with method + headers + body
 3. Update state with response
+
+---
+
+## 🎨 UI INTEGRATION
+
+**See `UI_INTEGRATION_GUIDE.md` for the complete breakdown!**
+
+It shows exactly how each file looks after adding each component:
+- **App.js:** 6 steps showing states → handlers → complete JSX layout
+- **ProductTable.js:** 1 step to add `onRowClick` prop
+- **index.css:** 4 new CSS classes for styling
+
+**UI Layout:**
+- Header: Title + "+ Add Product" button
+- Toolbar: Search input + Sort buttons + Filter inputs
+- Forms: Create form (when + clicked), Edit form (when row clicked)
+- Table: Clickable rows (cursor pointer)
+
+**UX Flow:**
+1. Search: Type → Click Search
+2. Sort: Click button (active state highlights)
+3. Filter: Enter min/max → Click Filter
+4. Create: Click "+" → Fill form → Save
+5. Update: Click row → Edit form → Save
 
 Good luck! 💪

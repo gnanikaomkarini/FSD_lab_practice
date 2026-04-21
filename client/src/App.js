@@ -56,9 +56,28 @@ function App() {
   // Fetches products matching the search query
   const handleSearch = async () => {
     try {
+      // ❌ VALIDATION: Cannot search empty query
+      if (!search || search.trim() === '') {
+        setError('Please enter a search term');
+        return;
+      }
+      
+      // 📡 FETCH: Send search request
       const res = await fetch(`http://localhost:5003/api/products/search?q=${search}`);
+      
+      // ✅ STATUS CHECK: Did request succeed?
+      if (!res.ok) {
+        const errorData = await res.json();
+        setError(errorData.error || `Error: ${res.status}`);
+        return;
+      }
+      
+      // 📦 PARSE: Get response data
       const data = await res.json();
-      setProducts(data);
+      
+      // 🎯 UPDATE: Ensure data is array before setting
+      setProducts(Array.isArray(data) ? data : []);
+      setError(null); // Clear any previous errors
     } catch (err) {
       setError(err.message);
     }
@@ -69,11 +88,33 @@ function App() {
   // order: 'asc' or 'desc'
   const handleSort = async (field, order) => {
     try {
+      // ❌ VALIDATION: Validate field and order on frontend too
+      const validFields = ["name", "price", "quantity", "createdAt"];
+      if (!validFields.includes(field) || !["asc", "desc"].includes(order)) {
+        setError('Invalid sort parameters');
+        return;
+      }
+      
+      // 💾 STATE: Update UI to show which sort is active
       setSortField(field);
       setSortOrder(order);
+      
+      // 📡 FETCH: Send sort request
       const res = await fetch(`http://localhost:5003/api/products/sort?field=${field}&order=${order}`);
+      
+      // ✅ STATUS CHECK: Did request succeed?
+      if (!res.ok) {
+        const errorData = await res.json();
+        setError(errorData.error || `Error: ${res.status}`);
+        return;
+      }
+      
+      // 📦 PARSE: Get response data
       const data = await res.json();
-      setProducts(data);
+      
+      // 🎯 UPDATE: Ensure data is array before setting
+      setProducts(Array.isArray(data) ? data : []);
+      setError(null);
     } catch (err) {
       setError(err.message);
     }
@@ -83,12 +124,39 @@ function App() {
   // Filters products by price range (min and max)
   const handleFilter = async () => {
     try {
+      // ❌ VALIDATION: If minPrice provided, must be valid number
+      if (minPrice && isNaN(parseFloat(minPrice))) {
+        setError('Min Price must be a valid number');
+        return;
+      }
+      
+      // ❌ VALIDATION: If maxPrice provided, must be valid number
+      if (maxPrice && isNaN(parseFloat(maxPrice))) {
+        setError('Max Price must be a valid number');
+        return;
+      }
+      
+      // 🏗️ BUILD URL: Construct URL with query parameters
       const url = new URL('http://localhost:5003/api/products/filter');
       if (minPrice) url.searchParams.append('minPrice', minPrice);
       if (maxPrice) url.searchParams.append('maxPrice', maxPrice);
+      
+      // 📡 FETCH: Send filter request
       const res = await fetch(url);
+      
+      // ✅ STATUS CHECK: Did request succeed?
+      if (!res.ok) {
+        const errorData = await res.json();
+        setError(errorData.error || `Error: ${res.status}`);
+        return;
+      }
+      
+      // 📦 PARSE: Get response data
       const data = await res.json();
-      setProducts(data);
+      
+      // 🎯 UPDATE: Ensure data is array before setting
+      setProducts(Array.isArray(data) ? data : []);
+      setError(null);
     } catch (err) {
       setError(err.message);
     }
@@ -98,6 +166,25 @@ function App() {
   // Creates a new product and adds it to the top of the list
   const handleCreateSubmit = async () => {
     try {
+      // ❌ VALIDATION: All fields required
+      if (!createForm.name || !createForm.price || !createForm.quantity) {
+        setError('All fields are required');
+        return;
+      }
+      
+      // ❌ VALIDATION: Price must be valid number
+      if (isNaN(parseFloat(createForm.price))) {
+        setError('Price must be a valid number');
+        return;
+      }
+      
+      // ❌ VALIDATION: Quantity must be valid number
+      if (isNaN(parseInt(createForm.quantity))) {
+        setError('Quantity must be a valid number');
+        return;
+      }
+      
+      // 📡 FETCH: Send POST request with product data
       const res = await fetch('http://localhost:5003/api/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -107,12 +194,24 @@ function App() {
           quantity: parseInt(createForm.quantity)
         })
       });
+      
+      // ✅ STATUS CHECK: Did creation succeed?
+      if (!res.ok) {
+        const errorData = await res.json();
+        setError(errorData.error || `Error: ${res.status}`);
+        return;
+      }
+      
+      // 📦 PARSE: Get newly created product
       const newProduct = await res.json();
-      // Add new product to the beginning of the list
+      
+      // 🎯 UPDATE: Add new product to beginning of list (optimistic update)
       setProducts([newProduct, ...products]);
-      // Close the form and reset inputs
+      
+      // 🧹 CLEANUP: Close form and reset inputs
       setShowCreate(false);
       setCreateForm({ name: '', price: '', quantity: '' });
+      setError(null);
     } catch (err) {
       setError(err.message);
     }
@@ -122,6 +221,25 @@ function App() {
   // Updates an existing product and refreshes the list
   const handleUpdateSubmit = async () => {
     try {
+      // ❌ VALIDATION: All fields required
+      if (!editForm.name || !editForm.price || !editForm.quantity) {
+        setError('All fields are required');
+        return;
+      }
+      
+      // ❌ VALIDATION: Price must be valid number
+      if (isNaN(parseFloat(editForm.price))) {
+        setError('Price must be a valid number');
+        return;
+      }
+      
+      // ❌ VALIDATION: Quantity must be valid number
+      if (isNaN(parseInt(editForm.quantity))) {
+        setError('Quantity must be a valid number');
+        return;
+      }
+      
+      // 📡 FETCH: Send PUT request with updated data
       const res = await fetch(`http://localhost:5003/api/products/${editId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -131,11 +249,27 @@ function App() {
           quantity: parseInt(editForm.quantity)
         })
       });
+      
+      // ✅ STATUS CHECK: Did update succeed?
+      if (!res.ok) {
+        const errorData = await res.json();
+        if (res.status === 404) {
+          setError('Product not found');
+        } else {
+          setError(errorData.error || `Error: ${res.status}`);
+        }
+        return;
+      }
+      
+      // 📦 PARSE: Get updated product
       const updated = await res.json();
-      // Update the product in the list
+      
+      // 🎯 UPDATE: Replace old product with updated version in list
       setProducts(products.map(p => p._id === editId ? updated : p));
-      // Close the edit form
+      
+      // 🧹 CLEANUP: Close form
       setEditId(null);
+      setError(null);
     } catch (err) {
       setError(err.message);
     }
@@ -143,6 +277,20 @@ function App() {
 
   return (
     <div className="container">
+      {/* ========== ERROR DISPLAY ========== */}
+      {error && (
+        <div style={{ 
+          background: '#fee2e2', 
+          color: '#991b1b', 
+          padding: '12px', 
+          borderRadius: '4px', 
+          marginBottom: '20px',
+          border: '1px solid #fecaca'
+        }}>
+          {error}
+        </div>
+      )}
+
       {/* ========== HEADER ROW: Title + Add Product Button ========== */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h1>Product Inventory</h1>
@@ -204,7 +352,15 @@ function App() {
         />
         <button
           onClick={handleSearch}
-          style={{ padding: '8px 12px', border: '1px solid #d1d5db', background: 'white', cursor: 'pointer', borderRadius: '4px' }}
+          disabled={!search.trim()}
+          style={{ 
+            padding: '8px 12px', 
+            border: '1px solid #d1d5db', 
+            background: search.trim() ? 'white' : '#f3f4f6',
+            cursor: search.trim() ? 'pointer' : 'not-allowed',
+            borderRadius: '4px',
+            opacity: search.trim() ? 1 : 0.6
+          }}
         >
           Search
         </button>

@@ -102,6 +102,47 @@ router.get("/filter", async (req, res) => {
   }
 });
 
+// ========== 4B. EXACT VALUE FILTER ROUTE ==========
+// GET /api/products/exact?field=<field>&value=<value>
+// Filters products by exact value (name or quantity)
+router.get("/exact", async (req, res) => {
+  try {
+    const { field, value } = req.query;
+    
+    // ❌ VALIDATION: Field and value required
+    if (!field || !value) {
+      return res.status(400).json({ error: "Field and value parameters are required" });
+    }
+    
+    // ❌ VALIDATION: Field must be valid (name or quantity only)
+    const validFields = ["name", "quantity"];
+    if (!validFields.includes(field)) {
+      return res.status(400).json({ error: "Field must be 'name' or 'quantity'" });
+    }
+    
+    // 🏗️ BUILD FILTER: Exact match based on field type
+    const filter = {};
+    
+    if (field === "name") {
+      // Exact match for name (case-insensitive)
+      filter.name = { $regex: `^${value}$`, $options: "i" };
+    } else if (field === "quantity") {
+      // Exact match for quantity (must be number)
+      const qty = parseInt(value);
+      if (isNaN(qty)) {
+        return res.status(400).json({ error: "Quantity must be a valid number" });
+      }
+      filter.quantity = qty;
+    }
+    
+    // 🔎 QUERY: Find products matching exact value
+    const products = await Product.find(filter).sort({ createdAt: -1 });
+    return res.status(200).json(products);
+  } catch (err) {
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
 // ========== 5. CREATE PRODUCT ROUTE ==========
 // POST /api/products
 // Creates a new product with name, price, quantity

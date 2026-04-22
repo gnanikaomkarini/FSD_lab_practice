@@ -4,6 +4,7 @@
 1. [Feature 1: SEARCH](#feature-1-search)
 2. [Feature 2: SORT](#feature-2-sort)
 3. [Feature 3: FILTER](#feature-3-filter)
+3B. [Feature 3B: EXACT VALUE FILTER](#feature-3b-exact-value-filter)
 4. [Feature 4: CREATE](#feature-4-create)
 5. [Feature 5: UPDATE](#feature-5-update)
 6. [Error Handling Pattern](#error-handling-pattern)
@@ -413,6 +414,154 @@ const handleFilter = async () => {
     Filter
   </button>
 </div>
+```
+
+---
+
+# FEATURE 3B: EXACT VALUE FILTER
+
+**Mnemonic:** "EXACT MATCH" = Precise value lookup (name or quantity)
+
+## Backend - Complete Code for server/routes/products.js
+
+```javascript
+// ========== 4B. EXACT VALUE FILTER ROUTE ==========
+// GET /api/products/exact?field=<field>&value=<value>
+// Filters products by exact value (name or quantity)
+router.get("/exact", async (req, res) => {
+  try {
+    const { field, value } = req.query;
+    
+    // ❌ VALIDATION: Field and value required
+    if (!field || !value) {
+      return res.status(400).json({ error: "Field and value parameters are required" });
+    }
+    
+    // ❌ VALIDATION: Field must be valid (name or quantity only)
+    const validFields = ["name", "quantity"];
+    if (!validFields.includes(field)) {
+      return res.status(400).json({ error: "Field must be 'name' or 'quantity'" });
+    }
+    
+    // 🏗️ BUILD FILTER: Exact match based on field type
+    const filter = {};
+    
+    if (field === "name") {
+      // Exact match for name (case-insensitive)
+      filter.name = { $regex: `^${value}$`, $options: "i" };
+    } else if (field === "quantity") {
+      // Exact match for quantity (must be number)
+      const qty = parseInt(value);
+      if (isNaN(qty)) {
+        return res.status(400).json({ error: "Quantity must be a valid number" });
+      }
+      filter.quantity = qty;
+    }
+    
+    // 🔎 QUERY: Find products matching exact value
+    const products = await Product.find(filter).sort({ createdAt: -1 });
+    return res.status(200).json(products);
+  } catch (err) {
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+```
+
+**Key Points:**
+- `field` parameter: "name" or "quantity"
+- `value` parameter: the exact value to match
+- For name: uses regex with `^value$` for exact match (case-insensitive)
+- For quantity: must convert to integer and match exactly
+- `.status(400)` = Validation failed
+
+---
+
+## Frontend - Complete Code for App.js
+
+### Step 1: Add Exact Filter State
+```javascript
+// ========== EXACT VALUE FILTER STATE ==========
+const [exactField, setExactField] = useState('name');
+const [exactValue, setExactValue] = useState('');
+```
+
+### Step 2: Add Exact Filter Handler with Error Handling
+```javascript
+// ========== EXACT VALUE FILTER HANDLER ==========
+// Filters products by exact name or quantity match
+const handleExactFilter = async () => {
+  try {
+    // ❌ VALIDATION: Value must be provided
+    if (!exactValue || exactValue.trim() === '') {
+      setError('Please enter a value to filter by');
+      return;
+    }
+    
+    // ❌ VALIDATION: If quantity field, must be valid number
+    if (exactField === 'quantity' && isNaN(parseInt(exactValue))) {
+      setError('Quantity must be a valid number');
+      return;
+    }
+    
+    // 🏗️ BUILD URL: Construct URL with query parameters
+    const url = new URL('http://localhost:5003/api/products/exact');
+    url.searchParams.append('field', exactField);
+    url.searchParams.append('value', exactValue);
+    
+    // 📡 FETCH: Send exact filter request
+    const res = await fetch(url);
+    
+    // ✅ STATUS CHECK: Did request succeed?
+    if (!res.ok) {
+      const errorData = await res.json();
+      setError(errorData.error || `Error: ${res.status}`);
+      return;
+    }
+    
+    // 📦 PARSE: Get response data
+    const data = await res.json();
+    
+    // 🎯 UPDATE: Ensure data is array before setting
+    setProducts(Array.isArray(data) ? data : []);
+    setError(null);
+  } catch (err) {
+    setError(err.message);
+  }
+};
+```
+
+### Step 3: Add Exact Filter UI (JSX in return statement)
+```javascript
+{/* ========== EXACT VALUE FILTER ========== */}
+<select
+  value={exactField}
+  onChange={e => setExactField(e.target.value)}
+  style={{ padding: '8px', border: '1px solid #d1d5db', borderRadius: '4px', minWidth: '120px' }}
+>
+  <option value="name">Filter by Name</option>
+  <option value="quantity">Filter by Quantity</option>
+</select>
+<input
+  value={exactValue}
+  onChange={e => setExactValue(e.target.value)}
+  placeholder={exactField === 'name' ? 'Product name' : 'Quantity'}
+  type={exactField === 'quantity' ? 'number' : 'text'}
+  style={{ padding: '8px', border: '1px solid #d1d5db', borderRadius: '4px', minWidth: '150px' }}
+/>
+<button
+  onClick={handleExactFilter}
+  disabled={!exactValue}
+  style={{ 
+    padding: '8px 12px', 
+    border: '1px solid #d1d5db', 
+    background: exactValue ? 'white' : '#f3f4f6',
+    cursor: exactValue ? 'pointer' : 'not-allowed',
+    borderRadius: '4px',
+    opacity: exactValue ? 1 : 0.6
+  }}
+>
+  Exact Filter
+</button>
 ```
 
 ---

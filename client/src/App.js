@@ -21,6 +21,11 @@ function App() {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
 
+  // ========== EXACT VALUE FILTER STATE ==========
+  // Stores field and value for exact matching
+  const [exactField, setExactField] = useState('name');
+  const [exactValue, setExactValue] = useState('');
+
   // ========== CREATE STATE ==========
   // showCreate: controls if create form is visible
   // createForm: stores name, price, quantity inputs
@@ -142,6 +147,48 @@ function App() {
       if (maxPrice) url.searchParams.append('maxPrice', maxPrice);
       
       // 📡 FETCH: Send filter request
+      const res = await fetch(url);
+      
+      // ✅ STATUS CHECK: Did request succeed?
+      if (!res.ok) {
+        const errorData = await res.json();
+        setError(errorData.error || `Error: ${res.status}`);
+        return;
+      }
+      
+      // 📦 PARSE: Get response data
+      const data = await res.json();
+      
+      // 🎯 UPDATE: Ensure data is array before setting
+      setProducts(Array.isArray(data) ? data : []);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  // ========== EXACT VALUE FILTER HANDLER ==========
+  // Filters products by exact name or quantity match
+  const handleExactFilter = async () => {
+    try {
+      // ❌ VALIDATION: Value must be provided
+      if (!exactValue || exactValue.trim() === '') {
+        setError('Please enter a value to filter by');
+        return;
+      }
+      
+      // ❌ VALIDATION: If quantity field, must be valid number
+      if (exactField === 'quantity' && isNaN(parseInt(exactValue))) {
+        setError('Quantity must be a valid number');
+        return;
+      }
+      
+      // 🏗️ BUILD URL: Construct URL with query parameters
+      const url = new URL('http://localhost:5003/api/products/exact');
+      url.searchParams.append('field', exactField);
+      url.searchParams.append('value', exactValue);
+      
+      // 📡 FETCH: Send exact filter request
       const res = await fetch(url);
       
       // ✅ STATUS CHECK: Did request succeed?
@@ -426,6 +473,37 @@ function App() {
           style={{ padding: '8px 12px', border: '1px solid #d1d5db', background: 'white', cursor: 'pointer', borderRadius: '4px' }}
         >
           Filter
+        </button>
+
+        {/* Exact Value Filter */}
+        <select
+          value={exactField}
+          onChange={e => setExactField(e.target.value)}
+          style={{ padding: '8px', border: '1px solid #d1d5db', borderRadius: '4px', minWidth: '120px' }}
+        >
+          <option value="name">Filter by Name</option>
+          <option value="quantity">Filter by Quantity</option>
+        </select>
+        <input
+          value={exactValue}
+          onChange={e => setExactValue(e.target.value)}
+          placeholder={exactField === 'name' ? 'Product name' : 'Quantity'}
+          type={exactField === 'quantity' ? 'number' : 'text'}
+          style={{ padding: '8px', border: '1px solid #d1d5db', borderRadius: '4px', minWidth: '150px' }}
+        />
+        <button
+          onClick={handleExactFilter}
+          disabled={!exactValue}
+          style={{ 
+            padding: '8px 12px', 
+            border: '1px solid #d1d5db', 
+            background: exactValue ? 'white' : '#f3f4f6',
+            cursor: exactValue ? 'pointer' : 'not-allowed',
+            borderRadius: '4px',
+            opacity: exactValue ? 1 : 0.6
+          }}
+        >
+          Exact Filter
         </button>
       </div>
 

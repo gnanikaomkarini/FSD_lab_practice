@@ -4,6 +4,7 @@
 - [1. Search API](#1-search-api)
 - [2. Sort API](#2-sort-api)
 - [3. Filter API](#3-filter-api)
+- [3B. Exact Value Filter API](#3b-exact-value-filter-api)
 - [4. Create API](#4-create-api)
 - [5. Update API](#5-update-api)
 - [Status Codes Reference](#status-codes-reference)
@@ -324,6 +325,124 @@ const handleFilter = async () => {
   const url = new URL('http://localhost:5003/api/products/filter');
   if (minPrice) url.searchParams.append('minPrice', minPrice);
   if (maxPrice) url.searchParams.append('maxPrice', maxPrice);
+  
+  const res = await fetch(url);
+  const data = await res.json();
+  setProducts(data);
+};
+```
+
+---
+
+# 3B. EXACT VALUE FILTER API
+
+**Purpose:** Find products by exact name or quantity match
+
+## Endpoint
+
+```
+GET /api/products/exact
+```
+
+## Request Parameters
+
+| Parameter | Type | Required | Options | Description |
+|-----------|------|----------|---------|-------------|
+| `field` | string | YES | `name`, `quantity` | Which field to match exactly |
+| `value` | string | YES | Any | The exact value to search for |
+
+## Query String Examples
+
+```
+http://localhost:5003/api/products/exact?field=name&value=iPhone
+http://localhost:5003/api/products/exact?field=quantity&value=5
+http://localhost:5003/api/products/exact?field=name&value=Laptop Pro
+```
+
+## cURL Examples
+
+```bash
+# Find products with exact name "iPhone"
+curl "http://localhost:5003/api/products/exact?field=name&value=iPhone"
+
+# Find products with exact quantity 5
+curl "http://localhost:5003/api/products/exact?field=quantity&value=5"
+
+# Find product named "Budget Laptop" (exact match, case-insensitive)
+curl "http://localhost:5003/api/products/exact?field=name&value=Budget%20Laptop"
+```
+
+## Success Response (Status: 200)
+
+Returns array of products matching the exact value
+
+```json
+[
+  {
+    "_id": "507f1f77bcf86cd799439011",
+    "name": "iPhone 15 Pro",
+    "price": 89999,
+    "quantity": 5,
+    "createdAt": "2024-04-22T10:30:00.000Z"
+  }
+]
+```
+
+## Empty Result (Status: 200)
+
+When no products match the exact value
+
+```json
+[]
+```
+
+## Error Response (Status: 400)
+
+When field or value is missing
+
+```json
+{
+  "error": "Field and value parameters are required"
+}
+```
+
+## Error Response (Status: 400)
+
+When field is not "name" or "quantity"
+
+```json
+{
+  "error": "Field must be 'name' or 'quantity'"
+}
+```
+
+## Error Response (Status: 400)
+
+When quantity value is not a valid number
+
+```json
+{
+  "error": "Quantity must be a valid number"
+}
+```
+
+## Error Response (Status: 500)
+
+Server database error
+
+```json
+{
+  "error": "Server error"
+}
+```
+
+## Frontend Usage
+
+```javascript
+const handleExactFilter = async () => {
+  const url = new URL('http://localhost:5003/api/products/exact');
+  url.searchParams.append('field', exactField); // "name" or "quantity"
+  url.searchParams.append('value', exactValue);
   
   const res = await fetch(url);
   const data = await res.json();
@@ -696,6 +815,15 @@ curl "http://localhost:5003/api/products/sort?field=price&order=asc"
 ## ✅ Test Filter
 ```bash
 curl "http://localhost:5003/api/products/filter?minPrice=10000&maxPrice=50000"
+```
+
+## ✅ Test Exact Value Filter
+```bash
+# Filter by exact name
+curl "http://localhost:5003/api/products/exact?field=name&value=iPhone"
+
+# Filter by exact quantity
+curl "http://localhost:5003/api/products/exact?field=quantity&value=5"
 ```
 
 ## ✅ Test Create
